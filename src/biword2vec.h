@@ -108,6 +108,7 @@ public:
         size_t training_words,
         size_t num_threads,
         double weight_neg_sampling,
+        WeightType weight_type = WEIGHT_FREQ,
         LossType method = LOSS_LINE,
         unsigned seed = 1
     );
@@ -327,12 +328,13 @@ bool BiWord2VecTrainer<IdType, T>::Train(
     size_t training_words,
     size_t num_threads,
     double weight_neg_sampling,
+    WeightType weight_type,
     LossType method,
     unsigned seed
 ) {
     data_manager_->load_data(input_path, num_threads);
     data_sampler_ = data_manager_->build_data_sampler(seed);
-    target_sampler_ = data_manager_->build_target_sampler(seed, weight_neg_sampling);
+    target_sampler_ = data_manager_->build_target_sampler(seed, weight_neg_sampling, weight_type);
 
     BiWord2VecModel<T>* model = new BiWord2VecModel<T> (
         data_manager_->source_size(),

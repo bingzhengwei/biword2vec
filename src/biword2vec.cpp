@@ -18,6 +18,8 @@ void print_usage(int argc, char **argv) {
         "--threads threads : set number of threads, default 1\n"
         "--weight_neg_sampling weight : set weight(exponential) "
         "for negative sampling, default 0\n"
+        "--weight_type freq|degree : set type of negative sampling weight, "
+        "frequency v.s. vertex in-degree, default frequency\n"
         "--seed seed : set seed, default 1\n"
         "--help : print this help\n", argv[0]
     );
@@ -37,7 +39,8 @@ int main(int argc, char**argv) {
         {"negative", required_argument, nullptr, 'n'},
         {"words", required_argument, nullptr, 'w'},
         {"threads", required_argument, nullptr, 't'},
-        {"weight_neg_sampling", required_argument, nullptr, 'p'},
+        {"weight_neg_sampling", required_argument, nullptr, 'c'},
+        {"weight_type", required_argument, nullptr, 'p'},
         {"seed", required_argument, nullptr, 's'},
         {"help", no_argument, nullptr, 'h'},
         {nullptr, 0, nullptr, 0}
@@ -55,6 +58,7 @@ int main(int argc, char**argv) {
     unsigned seed = 1;
     double weight_neg_sampling = 0;
     LossType method = LOSS_LINE;
+    WeightType type = WEIGHT_FREQ;
 
     while ((opt = getopt_long(argc, argv, "h", long_options, &opt_idx)) != -1) {
         switch (opt) {
@@ -86,8 +90,18 @@ int main(int argc, char**argv) {
         case 'n':
             negative = static_cast<size_t>(atoi(optarg));
             break;
-        case 'p':
+        case 'c':
             weight_neg_sampling = atof(optarg);
+            break;
+        case 'p':
+            if (!strcmp(optarg, "freq")) {
+                type = WEIGHT_FREQ;
+            } else if (!strcmp(optarg, "degree")) {
+                type = WEIGHT_INDGREE;
+            } else {
+                print_usage(argc, argv);
+                exit(-1);
+            }
             break;
         case 'w':
             words_per_iter = static_cast<size_t>(atoi(optarg));
@@ -122,6 +136,7 @@ int main(int argc, char**argv) {
         words_per_iter,
         threads,
         weight_neg_sampling,
+        type,
         method,
         seed
     );

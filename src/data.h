@@ -13,6 +13,8 @@
 
 static const size_t BUF_SIZE = 102400;
 
+enum WeightType { WEIGHT_FREQ = 0, WEIGHT_INDGREE = 1 };
+
 template <typename IdType, typename T>
 class Sample {
 public:
@@ -68,7 +70,11 @@ public:
 
     BaseSampler* build_data_sampler(unsigned seed = 1);
 
-    BaseSampler* build_target_sampler(unsigned seed = 1, double weight_exp = 0);
+    BaseSampler* build_target_sampler(
+        unsigned seed = 1,
+        double weight_exp = 0,
+        WeightType weight_type = WEIGHT_FREQ
+    );
 
     inline size_t size() {
         return samples_.size();
@@ -180,7 +186,11 @@ BaseSampler* DataManager<IdType, T>::build_data_sampler(unsigned seed) {
 }
 
 template <typename IdType, typename T>
-BaseSampler* DataManager<IdType, T>::build_target_sampler(unsigned seed, double weight_exp) {
+BaseSampler* DataManager<IdType, T>::build_target_sampler(
+    unsigned seed,
+    double weight_exp,
+    WeightType weight_type
+) {
     if (samples_.size() == 0) {
         return nullptr;
     }
@@ -188,7 +198,13 @@ BaseSampler* DataManager<IdType, T>::build_target_sampler(unsigned seed, double 
     std::unordered_map<IdType, double> target_weights;
     std::vector<std::pair<size_t, double> > data_weights;
     for (size_t i = 0; i < samples_.size(); ++i) {
-        target_weights[samples_[i].target()] += samples_[i].weight();
+        if (weight_type == WEIGHT_FREQ) {
+            // use frequency as sampling weight
+            target_weights[samples_[i].target()] += samples_[i].weight();
+        } else {
+            // use in-degree as sampling weight
+            target_weights[samples_[i].target()] += 1;
+        }
     }
 
     for (
