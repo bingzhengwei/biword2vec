@@ -451,6 +451,8 @@ void BiWord2VecTrainer<IdType, T>::TrainThread(
             context->logloss_count += count;
             context->training_words_actual += i - last_word_count;
             last_word_count = i;
+            count = 0;
+            logloss = 0;
             alpha_decay = 1. - context->training_words_actual * 1. /
                 (context->training_words * iteration + 1.);
             alpha_decay = std::max(static_cast<T>(0.0001), alpha_decay);
