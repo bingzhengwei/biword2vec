@@ -14,9 +14,10 @@ void WordTable::reserve(size_t table_size) {
 }
 
 size_t WordTable::SearchWord(const std::string& word) {
+    std::lock_guard<SpinLock> lock(lock_);
     auto iter = word_map_.find(word);
     if (iter == word_map_.end()) {
-        std::lock_guard<SpinLock> lock(lock_);
+        // std::lock_guard<SpinLock> lock(lock_);
         iter = word_map_.find(word);
         if (iter == word_map_.end()) {
             size_t id = word_vec_.size();
@@ -32,9 +33,10 @@ size_t WordTable::SearchWord(const std::string& word) {
 }
 
 size_t WordTable::SearchWord(const char* word) {
+    std::lock_guard<SpinLock> lock(lock_);
     auto iter = word_map_.find(word);
     if (iter == word_map_.end()) {
-        std::lock_guard<SpinLock> lock(lock_);
+        // std::lock_guard<SpinLock> lock(lock_);
         iter = word_map_.find(word);
         if (iter == word_map_.end()) {
             size_t id = word_vec_.size();
@@ -68,6 +70,7 @@ size_t WordTable::SearchWord(const char* word) const {
 }
 
 std::string WordTable::WordAt(size_t pos) {
+    std::lock_guard<SpinLock> lock(lock_);
     if (pos >= word_vec_.size()) {
         return std::string();
     } else {
